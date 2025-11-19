@@ -1,0 +1,31 @@
+코드는 설명을 위해서 일부만 가져온거라서 그냥 공부용으로 쓰고 실행은 안될 겁니다
+gaze_guideline은 코드 주석을 일단 안했습니다. 코드 전문을 공부하면 좋을 것 같고 설명하기 어려워서 직접 공부하는 것이 빠를것이라고 생각했습니다.
+가이드라인을 만들때 사용한 출처와 이외에도 볼 수 있을 만한 자료에 대해서 출처 남깁니다.
+===============================================
+기본 mediapipe에 대한 공부자료
+->https://www.youtube.com/watch?v=AJ62K7ooR4Q&t=1s
+
++ SaiVishwa021/Driver-Drowsiness-detection-using-Mediapipe
+순수 MediaPipe Face Mesh와 EAR 공식만을 사용하여 실시간 졸음 감지 및 경고 시스템을 구현한 기본적인 예시입니다.
+-> https://github.com/SaiVishwa021/Driver-Drowsiness-detection-using-Mediapipe
+
++danielsousaoliveira/driving-monitor-python
+EAR, 입 벌림 상태(하품), 헤드 포즈 등 다양한 징후를 결합하여 피로도를 측정하는 모니터링 시스템입니다.
+-> https://github.com/danielsousaoliveira/driving-monitor-python
+
++MichaelBalas/DeepSight
+MediaPipe Iris 모델을 사용하여 **홍채 깊이(Iris Depth)와 크기(Diameter)**를 추정하는 코드. 거리 측정 및 근시 예방 연구에 활용됩니다.
+->https://github.com/MichaelBalas/DeepSight
+
++alireza787b/Python-Gaze-Face-Tracker
+실시간 시선(Gaze) 및 얼굴 추적 기능. 눈 중심점과 홍채의 상대적 위치를 계산하고, 헤드 포즈를 보정하여 시선 방향을 추정합니다.
+->https://github.com/alireza787b/Python-Gaze-Face-Tracker
+
++Asadullah-Dal17/Eyes-Position-Estimator-Mediapipe
+MediaPipe 랜드마크를 활용하여 **눈의 위치(좌, 우, 중앙)**를 추정하고 눈 깜빡임을 감지하는 프로젝트입니다.
+->https://github.com/Asadullah-Dal17/Eyes-Position-Estimator-Mediapipe
+
++Medium Post: Eye gaze estimation using a webcam...(이 자료는 보는 걸 추천/gaze_guideline의 출처)
+MediaPipe를 통해 얻은 랜드마크를 Pinhole Camera Model과 OpenCV의 estimateAffline3D 함수를 사용하여 3D 시선 벡터를 계산하는 방법을 설명하고 있습니다.
+->https://medium.com/@amit.aflalo2/eye-gaze-estimation-using-a-webcam-in-100-lines-of-code-570d4683fe23
+====================================================
