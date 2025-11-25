@@ -31,6 +31,7 @@ def run_camera():
         cv2.imshow("실시간 웹캠", processed) #화면 출력
         if cv2.waitKey(1) & 0xFF == ord('q'): #일단강종버튼 넣었음
             break
+    
     cap.release()
     cv2.destroyAllWindows()
 if __name__ == "__main__":
