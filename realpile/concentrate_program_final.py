@@ -25,7 +25,7 @@ GAZE_MOVE_THRESHOLD = 5        # 픽셀 이동 기준
 YAWN_THRESHOLD = 25            # 입 벌림(px) 기준
 
 # -------------------------------
-# 집중도 계산 함수 (가중치 적용)
+# 집중도 함수
 # -------------------------------
 def calculate_focus(yawn, blink, closed_time, w1=0.3, w2=0.2, w3=0.5, blink_max=20):
     """
@@ -94,3 +94,4 @@ def process_frame(frame, holistic):
 # -------------------------------
 if __name__ == "__main__":
     run_camera()
+
