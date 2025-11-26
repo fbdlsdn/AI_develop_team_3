@@ -19,7 +19,7 @@ yawn_state = False
 prev_eye_center = None
 closed_seconds = 0   # 눈 감은 시간(초)
 
-# 눈 감김 민감도 및 시선 이동 민감도
+# 민감도 설정
 CLOSED_THRESHOLD = 5           # 눈 높이(px) 기준
 GAZE_MOVE_THRESHOLD = 5        # 픽셀 이동 기준
 YAWN_THRESHOLD = 25            # 입 벌림(px) 기준
@@ -30,9 +30,9 @@ YAWN_THRESHOLD = 25            # 입 벌림(px) 기준
 def calculate_focus(yawn, blink, closed_time, w1=0.3, w2=0.2, w3=0.5, blink_max=20):
     """
     집중도 수식:
-    S(t) = max(0, 100 - (w1*Nyawn(t) + w2*(Nblink(t)/Nblink_max) + w3*(Tclosed(t)/60)))
+    S(t) = max(0, 100 - (w1*Nyawn(t) + w2*(Nblink(t)/Nblink_max) + w3*(Tclosed(t)/10)))
     """
-    score = 100 - (w1*yawn + w2*(blink/blink_max) + w3*(closed_time/60))
+    score = 100 - (w1*yawn + w2*(blink/blink_max) + w3*(closed_time/10))
     return max(0, score)
 
 # -------------------------------
@@ -60,7 +60,7 @@ def process_frame(frame, holistic):
         eye_avg_height = (left_eye_height + right_eye_height) / 2
 
         if eye_avg_height < CLOSED_THRESHOLD:
-            closed_seconds += 1/30.0  # 대략 30fps 기준으로 눈 감은 시간 누적
+            closed_seconds += 1/30.0
             if not eye_closed:
                 eye_closed = True
                 blink_count += 1
@@ -125,8 +125,8 @@ def run_camera():
         print("카메라를 열 수 없습니다.")
         return
 
-    minute_scores = []
-    start_minute = time.time()
+    segment_scores = []   # 10초 단위 집중도 점수 저장
+    start_segment = time.time()
 
     with mp_holistic.Holistic(
         static_image_mode=False,
@@ -139,20 +139,20 @@ def run_camera():
                 break
 
             processed = process_frame(frame, holistic)
-            cv2.imshow("Holistic Concentration Tracker", processed)
+            cv2.imshow("Holistic Concentration Tracker (10s)", processed)
 
-            # 1분마다 집중도 계산
-            if time.time() - start_minute >= 60:
+            #10초마다 집중도 계산입니다다
+            if time.time() - start_segment >= 10:
                 score = calculate_focus(yawn_count, blink_count, closed_seconds)
-                minute_scores.append(score)
-                print(f"{len(minute_scores)}분 집중도: {score:.2f}")
+                segment_scores.append(score)
+                print(f"{len(segment_scores)}번째 10초 집중도: {score:.2f}")
 
                 # 카운트 초기화
                 blink_count = 0
                 yawn_count = 0
                 gaze_change_count = 0
                 closed_seconds = 0
-                start_minute = time.time()
+                start_segment = time.time()
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -161,12 +161,12 @@ def run_camera():
     cv2.destroyAllWindows()
 
     # 최종 집중도 통계 출력
-    if minute_scores:
-        avg_focus = sum(minute_scores) / len(minute_scores)
-        best_minute = minute_scores.index(max(minute_scores)) + 1
+    if segment_scores:
+        avg_focus = sum(segment_scores) / len(segment_scores)
+        best_segment = segment_scores.index(max(segment_scores)) + 1
         print("=== 최종 집중도 통계 ===")
         print("평균 집중도:", avg_focus)
-        print("최고 집중도 시간대:", best_minute, "분")
+        print("최고 집중도 구간:", best_segment, "번째 10초")
     else:
         print("집중도 데이터가 없습니다.")
 
