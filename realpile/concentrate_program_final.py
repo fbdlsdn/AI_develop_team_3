@@ -11,6 +11,7 @@ mp_holistic = mp.solutions.holistic
 # -------------------------------
 # 상태 초기화
 # -------------------------------
+segment_scores = []
 blink_count = 0
 yawn_count = 0
 gaze_change_count = 0
@@ -23,6 +24,7 @@ closed_seconds = 0   # 눈 감은 시간(초)
 CLOSED_THRESHOLD = 5           # 눈 높이(px) 기준
 GAZE_MOVE_THRESHOLD = 5        # 픽셀 이동 기준
 YAWN_THRESHOLD = 25            # 입 벌림(px) 기준
+
 
 # -------------------------------
 # 집중도 함수
@@ -74,10 +76,8 @@ def process_frame(frame, holistic):
                 start_segment = time.time()
 
             if cv2.waitKey(1) & 0xFF == ord('q'):  # q 키로 종료
-                break
+                return 0
 
-    cap.release()
-    cv2.destroyAllWindows()
 
     # 최종 집중도 통계 출력
     if segment_scores:

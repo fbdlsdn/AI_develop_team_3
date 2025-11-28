@@ -18,7 +18,7 @@ yawn_state = False
 prev_eye_center = None
 
 # 눈 감김 민감도 및 시선 이동 민감도
-CLOSED_THRESHOLD = 5           # 눈 높이(px) 기준
+CLOSED_THRESHOLD = 2           # 눈 높이(px) 기준
 GAZE_MOVE_THRESHOLD = 5         # 픽셀 이동 기준
 YAWN_THRESHOLD = 25             # 입 벌림(px) 기준
 
