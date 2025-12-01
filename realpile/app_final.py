@@ -351,4 +351,5 @@ else:
     st.info("측정을 시작하려면 버튼을 눌러주세요.")
     
     # 5. 최종 분석 결과 표시
-    show_analysis(st.session_state['last_analysis'])
+
+    show_analysis(st.session_state['analysis'])
