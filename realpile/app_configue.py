@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import mediapipe.python.solutions.face_mesh as mp_face_mesh
+import matplotlib.font_manager as fm # 폰트 관리자 추가
 
 # -------------------------------
 # 설정 및 Mediapipe 초기화
@@ -21,7 +22,31 @@ CLOSED_THRESHOLD = 3
 HALF_CLOSED_THRESHOLD = 6   
 YAWN_THRESHOLD = 25       
 GAZE_THRESHOLD = 0.45     
-BLINK_MAX = 20            
+BLINK_MAX = 20         
+
+# -------------------------------
+# 🌟 한글 폰트 설정 시작 🌟
+# -------------------------------
+
+def set_korean_font():
+    """Matplotlib에서 한글을 표시하기 위한 폰트 설정"""
+    # 시스템에 설치된 폰트에서 한글 폰트를 찾습니다.
+    # 우선 순위: Malgun Gothic (Windows), AppleGothic (Mac), NanumGothic (Linux/기타)
+    font_candidates = ['Malgun Gothic', 'AppleGothic', 'NanumGothic', 'NanumMyeongjo', 'HYGothic']
+    
+    font_name = None
+    for f in font_candidates:
+        if f in [font.name for font in fm.fontManager.ttflist]:
+            font_name = f
+            break
+            
+    if font_name:
+        plt.rcParams['font.family'] = font_name
+        plt.rcParams['axes.unicode_minus'] = False # 마이너스 기호 깨짐 방지
+        # st.toast(f"✅ Matplotlib 폰트 설정 완료: {font_name}") # 디버깅용
+    else:
+        # st.toast("⚠️ 한글 폰트를 찾을 수 없습니다. 기본 폰트로 표시됩니다.", icon='🚨') # 디버깅용
+        pass
 
 # -------------------------------
 # 집중 단계 정의 및 계산 함수 (유지)
@@ -147,10 +172,11 @@ def display_results(scores, states, total_time_segments, is_final=False):
 # Streamlit 메인 함수
 # -------------------------------
 def main():
-    st.title("🧠 실시간 집중도 측정 애플리케이션 (화면 비노출 모드)")
-    
-    st.info("💡 **웹캠은 백그라운드에서 실시간 측정을 위해 활성화됩니다.** 카메라 영상은 사용자에게 표시되지 않고, 10초마다 집중도 분석 결과만 업데이트됩니다.")
 
+    set_korean_font()
+
+    st.title("🧠 StudySense")
+    
     # -------------------------------
     # 상태 초기화 및 History 추가
     # -------------------------------
@@ -184,7 +210,7 @@ def main():
         # '현재 기록 보기' 버튼 (녹화 중이 아니거나 기록이 있을 때)
         if st.session_state.is_running or st.session_state.all_scores or st.session_state.history:
             is_current_active = st.session_state.selected_history_index is None
-            if st.button("▶️ 현재 세션 기록 보기", disabled=is_current_active):
+            if st.button("현재 기록 보기", disabled=is_current_active):
                 st.session_state.selected_history_index = None
                 st.rerun()
 
@@ -193,8 +219,9 @@ def main():
         if st.session_state.history:
             st.subheader("저장된 기록")
             for i, record in enumerate(st.session_state.history):
-                # 버튼 레이블: 기록 이름 (평균 점수)
-                label = f"#{i+1}: {record['timestamp']} ({record['avg_score']}점)"
+                # 버튼 레이블: 기록 이름 (평균 점수) -> 총 시간 추가
+                # 👇 수정된 부분: {record['total_duration']} 추가
+                label = f"#{i+1}: {record['timestamp']} ({record['avg_score']}점, {record['total_duration']})"
                 is_selected = st.session_state.selected_history_index == i
                 
                 # 버튼 클릭 시 해당 기록 인덱스 저장 후 리런
@@ -220,21 +247,28 @@ def main():
             if st.session_state.all_scores:
                 avg_score = round(sum(st.session_state.all_scores)/len(st.session_state.all_scores), 2)
                 
+                # 👇 추가/수정된 부분: 총 측정 시간 (초) 계산 및 포맷팅
+                total_duration_seconds = len(st.session_state.all_scores) * 10 
+                hours = int(total_duration_seconds // 3600)
+                minutes = int((total_duration_seconds % 3600) // 60)
+                seconds = int(total_duration_seconds % 60)
+                time_display = f"{hours:02d}시간 {minutes:02d}분 {seconds:02d}초"
+                
                 st.session_state.history.append({
                     'timestamp': time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(st.session_state.recording_start_time)),
                     'avg_score': avg_score,
                     'scores': st.session_state.all_scores,
                     'states': st.session_state.all_states,
-                    'segments': len(st.session_state.all_scores)
+                    'segments': len(st.session_state.all_scores),
+                    # 👇 추가된 데이터
+                    'total_duration': time_display 
                 })
                 # 저장 후, 저장된 기록을 보여주도록 selected_history_index를 마지막 기록으로 설정
                 st.session_state.selected_history_index = len(st.session_state.history) - 1
                 
             st.session_state.recording_start_time = 0 
             st.rerun()
-            
-        col2.markdown("## <span style='color:red;'>🔴 Recording...</span>", unsafe_allow_html=True)
-        
+                    
     else:
         start_button = col1.button("▶️ 녹화 시작", key="start_main", type="primary")
         if start_button:
@@ -250,9 +284,7 @@ def main():
             st.session_state.current_total_time = "00:00:00"
             st.session_state.selected_history_index = None # 새 녹화 시작 시 선택 기록 해제
             st.rerun()
-            
-        col2.markdown("## ⚪ 대기 중")
-        
+                    
     st.markdown("---")
     
     # -------------------------------
@@ -291,9 +323,7 @@ def main():
             st.session_state.is_running = False
             cap.release()
             return
-            
-        st.sidebar.info("측정 중... 웹캠이 백그라운드에서 활성화되었습니다.")
-        
+                    
         blink_count = yawn_count = 0
         closed_seconds = half_closed_seconds = gaze_out_seconds = 0.0
         eye_closed = yawn_state = False
